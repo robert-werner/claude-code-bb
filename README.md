@@ -25,7 +25,7 @@ preflight-check
           program-intelligence → scope-checker → subdomain-enum
       → js-analysis → api-surface
           → hypothesis-agent
-              → idor-hunter / manual testing
+              → idor-hunter / dotnet-hunter / manual testing
                   → report-draft → triager → submit
                       → triage-debrief (after every closure)
 ```
@@ -42,6 +42,7 @@ preflight-check
 | `skills/scope-checker.md` | Loads the program scope and classifies any asset as IN SCOPE / OUT OF SCOPE / PASSIVE ONLY before active testing. Hard stops on third-party infrastructure and ambiguous assets |
 | `skills/hypothesis-agent.md` | Reads all recon files for a target and generates 5–10 specific, non-obvious attack hypotheses with test steps, uniqueness scores, and a duplicate-risk adversarial review |
 | `skills/idor-hunter.md` | Systematic IDOR workflow covering 7 attack vectors. Enforces two-account setup, validates actual victim data exposure (not just a 200), and produces a submission-ready PoC |
+| `skills/dotnet-hunter.md` | Comprehensive .NET/ASP.NET skill — fingerprints the stack (WebForms, MVC, Core, WCF, IIS), maps .NET-specific attack surface, and systematically tests ViewState MAC, Telerik CVEs, ELMAH/trace exposure, machineKey leaks, IIS tilde enumeration, and ASP.NET Core routing bypasses |
 | `skills/triager.md` | Pre-submission critique — simulates a real Bugcrowd triager, runs N/A pattern detection, validates the impact chain, calibrates severity, and produces a Submit / Fix / Do Not Submit verdict |
 | `skills/report-draft.md` | Formats a validated finding into a clean, submission-ready report |
 | `skills/session-resume.md` | Two-mode skill: WRITE generates a full session checkpoint (recon status, open leads, findings, exact stopping point), READ consumes it and resumes immediately. Auto-writes every 2 hours and after every validated finding |
@@ -76,6 +77,7 @@ claude-code-bb/
 │   ├── scope-checker.md           # In-scope / out-of-scope classification
 │   ├── hypothesis-agent.md        # Attack hypothesis generation from recon
 │   ├── idor-hunter.md             # Systematic IDOR testing workflow
+│   ├── dotnet-hunter.md           # .NET/ASP.NET/IIS fingerprinting and vulnerability hunting
 │   ├── triager.md                 # Pre-submission report critique
 │   ├── report-draft.md            # Finding → submission-ready report
 │   ├── session-resume.md          # Session checkpoint write/read
