@@ -18,6 +18,7 @@ Every session follows this order. Do not skip steps.
    - `/idor-hunter` — endpoints with object references
    - `/dotnet-hunter` — .NET, ASP.NET, or IIS targets
    - `/race-condition-hunter` — rate-limited actions, payments, tokens, balance operations
+   - `/oauth-hunter` — OAuth flows, SSO, social login, JWT authentication
 6. **Validate** — Every finding must pass the PoC standard before being logged as a Finding.
 7. **Report** — Use `/report-draft` to format. Use `/triager` to critique before submitting. Do not submit anything the triager would reject.
 8. **Checkpoint** — Write a `/session-resume` checkpoint after every validated finding, at every major recon phase completion, and every 2 hours of autonomous operation.
@@ -35,6 +36,7 @@ Every session follows this order. Do not skip steps.
 | `/idor-hunter` | When endpoints with object references are identified |
 | `/dotnet-hunter` | When target runs .NET, ASP.NET, or IIS — fingerprint stack, hunt ViewState, Telerik, ELMAH, machineKey, and IIS-specific bugs |
 | `/race-condition-hunter` | When endpoints involve rate-limited actions, payments, coupons, tokens, balance/credit systems, or any shared-state operation |
+| `/oauth-hunter` | When target implements OAuth 2.0, OpenID Connect, SSO, social login, or JWT-based authentication |
 | `/triager` | Before every submission — brutal pre-submission critique |
 | `/report-draft` | Format a validated finding into a submission-ready report |
 | `/session-resume` | End of session (WRITE) or start of resumed session (READ) |
@@ -86,6 +88,7 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - IDOR requires actual victim data in the response, not just a 200 status code. Use `/idor-hunter` for systematic testing.
 - .NET ViewState findings require MAC validation status confirmed before logging. Use `/dotnet-hunter` for systematic .NET testing.
 - Race condition findings require actual state change confirmed post-race (balance, count, flag). Multiple 200s alone are not sufficient. Use `/race-condition-hunter` for systematic testing.
+- OAuth state parameter absence requires a complete login CSRF attack scenario — not just "state is missing". Use `/oauth-hunter` for systematic OAuth testing.
 - Do not overstate impact.
 - PoC or GTFO.
 - Waybackurls output may not be valid — if a URL returns 404, do not attempt to access it.

@@ -25,7 +25,7 @@ preflight-check
           program-intelligence → scope-checker → subdomain-enum
       → js-analysis → api-surface
           → hypothesis-agent
-              → idor-hunter / dotnet-hunter / race-condition-hunter / manual testing
+              → idor-hunter / dotnet-hunter / race-condition-hunter / oauth-hunter / manual testing
                   → report-draft → triager → submit
                       → triage-debrief (after every closure)
 ```
@@ -44,6 +44,7 @@ preflight-check
 | `skills/idor-hunter.md` | Systematic IDOR workflow covering 7 attack vectors. Enforces two-account setup, validates actual victim data exposure (not just a 200), and produces a submission-ready PoC |
 | `skills/dotnet-hunter.md` | Comprehensive .NET/ASP.NET skill — fingerprints the stack (WebForms, MVC, Core, WCF, IIS), maps .NET-specific attack surface, and systematically tests ViewState MAC, Telerik CVEs, ELMAH/trace exposure, machineKey leaks, IIS tilde enumeration, and ASP.NET Core routing bypasses |
 | `skills/race-condition-hunter.md` | Systematic race condition hunting covering 6 vulnerability classes (double-spend, coupon reuse, token reuse, limit bypass, TOCTOU, duplicate resource). Includes single-packet HTTP/2 attack technique, parallel curl playbooks for each class, and requires actual state change confirmation before logging a finding |
+| `skills/oauth-hunter.md` | Full OAuth 2.0 and authentication flow audit — covers OpenID Connect discovery, state/CSRF testing, redirect_uri manipulation (7 bypass variants), authorization code replay, JWT algorithm confusion (alg:none and RS256→HS256), account takeover chains via pre-auth linking and unverified email claims, and provider-specific checks for Auth0, Keycloak, and Azure AD |
 | `skills/triager.md` | Pre-submission critique — simulates a real Bugcrowd triager, runs N/A pattern detection, validates the impact chain, calibrates severity, and produces a Submit / Fix / Do Not Submit verdict |
 | `skills/report-draft.md` | Formats a validated finding into a clean, submission-ready report |
 | `skills/session-resume.md` | Two-mode skill: WRITE generates a full session checkpoint (recon status, open leads, findings, exact stopping point), READ consumes it and resumes immediately. Auto-writes every 2 hours and after every validated finding |
@@ -80,6 +81,7 @@ claude-code-bb/
 │   ├── idor-hunter.md                 # Systematic IDOR testing workflow
 │   ├── dotnet-hunter.md               # .NET/ASP.NET/IIS fingerprinting and vulnerability hunting
 │   ├── race-condition-hunter.md       # Race condition detection and exploitation
+│   ├── oauth-hunter.md                # OAuth 2.0, SSO, JWT, and auth flow testing
 │   ├── triager.md                     # Pre-submission report critique
 │   ├── report-draft.md                # Finding → submission-ready report
 │   ├── session-resume.md              # Session checkpoint write/read
