@@ -8,7 +8,7 @@ Built and documented as part of the LoganSec bug bounty journey.
 Drop `CLAUDE.md` into the root of whatever directory you're running Claude Code from.  
 Skills go in a `/skills` folder. Recon workflows go in a `/recon` folder in the same directory.
 
-Every session starts with `/preflight-check`. Everything else follows from there.
+For a brand new target, just say **"start a new engagement on [target]"** — `/new-engagement` handles the rest.
 
 Adapt everything. These are my configs — your hunting style will be different.
 
@@ -19,12 +19,15 @@ Adapt everything. These are my configs — your hunting style will be different.
 CLAUDE.md enforces this order every session:
 
 ```
-preflight-check → program-intelligence (new) or session-resume (returning)
-  → scope-checker (every new asset)
-    → subdomain-enum → js-analysis → api-surface
-      → hypothesis-agent → idor-hunter / manual testing
-        → report-draft → triager → submit
-          → triage-debrief (after every closure)
+preflight-check
+  → new-engagement (first time) or session-resume (returning)
+      → [new-engagement runs internally:]
+          program-intelligence → scope-checker → subdomain-enum
+      → js-analysis → api-surface
+          → hypothesis-agent
+              → idor-hunter / manual testing
+                  → report-draft → triager → submit
+                      → triage-debrief (after every closure)
 ```
 
 ---
@@ -34,6 +37,7 @@ preflight-check → program-intelligence (new) or session-resume (returning)
 | Skill | What it does |
 |---|---|
 | `skills/preflight-check.md` | Verifies SSH connectivity, all required tools, directory structure, and network health before any session starts. Produces a GO / NO-GO verdict with install commands for anything missing |
+| `skills/new-engagement.md` | One-command onboarding for a new target — chains preflight, program intelligence, scope initialization, and subdomain enumeration in sequence. Pauses at blocking failures and requires scope confirmation before recon begins |
 | `skills/program-intelligence.md` | Pre-hunt research — analyzes disclosed reports, builds a triager behavior profile, maps gap surfaces with no prior disclosures, and generates a tiered hunt priority map |
 | `skills/scope-checker.md` | Loads the program scope and classifies any asset as IN SCOPE / OUT OF SCOPE / PASSIVE ONLY before active testing. Hard stops on third-party infrastructure and ambiguous assets |
 | `skills/hypothesis-agent.md` | Reads all recon files for a target and generates 5–10 specific, non-obvious attack hypotheses with test steps, uniqueness scores, and a duplicate-risk adversarial review |
@@ -64,8 +68,10 @@ After all three complete, run `/hypothesis-agent ~/bugbounty/$TARGET` to generat
 ```
 claude-code-bb/
 ├── CLAUDE.md                      # Master config — session lifecycle, rules, skill index
+├── CONTRIBUTING.md                # How to write new skills and recon workflows
 ├── skills/
 │   ├── preflight-check.md         # Environment and tool verification
+│   ├── new-engagement.md          # Full onboarding chain for a new target
 │   ├── program-intelligence.md    # Pre-hunt program research
 │   ├── scope-checker.md           # In-scope / out-of-scope classification
 │   ├── hypothesis-agent.md        # Attack hypothesis generation from recon

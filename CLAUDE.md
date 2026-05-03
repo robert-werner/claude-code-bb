@@ -11,7 +11,7 @@ Recon tools are located at /home/kali/go/bin/ and /usr/bin on Kali. Always call 
 Every session follows this order. Do not skip steps.
 
 1. **Preflight** — Run `/preflight-check` before anything else. Verify SSH, tools, directories, and network. If NO-GO, stop and report what needs fixing. Do not proceed until GO or GO WITH WARNINGS.
-2. **Resume or Start** — If a session checkpoint exists, run `/session-resume` and continue from the exact stopping point. If fresh engagement, run `/program-intelligence` before any recon.
+2. **Resume or Start** — If a session checkpoint exists, run `/session-resume` and continue from the exact stopping point. If fresh engagement, run `/new-engagement` — it handles program-intelligence, scope init, and subdomain-enum automatically.
 3. **Scope** — Run `/scope-checker` on every new asset before active testing. When in doubt, passive only.
 4. **Recon** — Follow the recon workflow order: subdomain-enum → js-analysis → api-surface. Feed outputs into `/hypothesis-agent`.
 5. **Hunt** — Test hypotheses. Use `/idor-hunter` for access control surfaces. Document everything in the note hierarchy.
@@ -25,6 +25,7 @@ Every session follows this order. Do not skip steps.
 | Skill | When to use |
 |---|---|
 | `/preflight-check` | Start of every session — verify tools, SSH, dirs, network |
+| `/new-engagement` | Brand new target — runs preflight → program-intelligence → scope init → subdomain-enum in one chain |
 | `/program-intelligence` | Start of every new engagement — research program history and triager behavior |
 | `/scope-checker` | Before testing any new asset or subdomain |
 | `/hypothesis-agent` | After recon is complete — generate specific, non-obvious attack hypotheses |
