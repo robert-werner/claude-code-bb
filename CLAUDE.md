@@ -14,7 +14,10 @@ Every session follows this order. Do not skip steps.
 2. **Resume or Start** — If a session checkpoint exists, run `/session-resume` and continue from the exact stopping point. If fresh engagement, run `/new-engagement` — it handles program-intelligence, scope init, and subdomain-enum automatically.
 3. **Scope** — Run `/scope-checker` on every new asset before active testing. When in doubt, passive only.
 4. **Recon** — Follow the recon workflow order: subdomain-enum → js-analysis → api-surface. Feed outputs into `/hypothesis-agent`.
-5. **Hunt** — Test hypotheses. Use `/idor-hunter` for access control surfaces. Use `/dotnet-hunter` when the target runs .NET, ASP.NET, or IIS. Document everything in the note hierarchy.
+5. **Hunt** — Test hypotheses. Use the appropriate specialist skill for the surface:
+   - `/idor-hunter` — endpoints with object references
+   - `/dotnet-hunter` — .NET, ASP.NET, or IIS targets
+   - `/race-condition-hunter` — rate-limited actions, payments, tokens, balance operations
 6. **Validate** — Every finding must pass the PoC standard before being logged as a Finding.
 7. **Report** — Use `/report-draft` to format. Use `/triager` to critique before submitting. Do not submit anything the triager would reject.
 8. **Checkpoint** — Write a `/session-resume` checkpoint after every validated finding, at every major recon phase completion, and every 2 hours of autonomous operation.
@@ -31,6 +34,7 @@ Every session follows this order. Do not skip steps.
 | `/hypothesis-agent` | After recon is complete — generate specific, non-obvious attack hypotheses |
 | `/idor-hunter` | When endpoints with object references are identified |
 | `/dotnet-hunter` | When target runs .NET, ASP.NET, or IIS — fingerprint stack, hunt ViewState, Telerik, ELMAH, machineKey, and IIS-specific bugs |
+| `/race-condition-hunter` | When endpoints involve rate-limited actions, payments, coupons, tokens, balance/credit systems, or any shared-state operation |
 | `/triager` | Before every submission — brutal pre-submission critique |
 | `/report-draft` | Format a validated finding into a submission-ready report |
 | `/session-resume` | End of session (WRITE) or start of resumed session (READ) |
@@ -81,6 +85,7 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - CORS misconfigurations are often false positives — confirm actual exploitability before escalating.
 - IDOR requires actual victim data in the response, not just a 200 status code. Use `/idor-hunter` for systematic testing.
 - .NET ViewState findings require MAC validation status confirmed before logging. Use `/dotnet-hunter` for systematic .NET testing.
+- Race condition findings require actual state change confirmed post-race (balance, count, flag). Multiple 200s alone are not sufficient. Use `/race-condition-hunter` for systematic testing.
 - Do not overstate impact.
 - PoC or GTFO.
 - Waybackurls output may not be valid — if a URL returns 404, do not attempt to access it.
