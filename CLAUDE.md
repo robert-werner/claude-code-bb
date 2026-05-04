@@ -43,6 +43,7 @@ Every session follows this order. Do not skip steps.
 | `/report-draft` | Format a validated finding into a submission-ready report |
 | `/session-resume` | End of session (WRITE) or start of resumed session (READ) |
 | `/triage-debrief` | After every report closure — extract lessons, detect patterns |
+| `/focus-discipline` | When the hunt stalls, loops, or fixates — recalibrate focus and redeploy lesson material |
 
 ## Recon Workflows
 
@@ -96,3 +97,34 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - PoC or GTFO.
 - Waybackurls output may not be valid — if a URL returns 404, do not attempt to access it.
 - Before submitting anything, run `/triager`. If it returns "Do not submit", do not submit.
+
+## Hunt Discipline
+
+This section governs how to behave *around* a finding — before it, during it, and after it closes.
+
+**Before a finding is confirmed:**
+- Hunt broadly. A hypothesis is a direction, not a destination. If a surface yields nothing after a focused attempt, log it as ruled-out and move on. Do not retry the same attack on the same endpoint indefinitely — that is not persistence, it is fixation.
+- Time-box every hypothesis. If you have not made progress on a specific angle in 30–45 minutes of active testing, pause, log what was tried, and switch surfaces. Return later with fresh recon or a different angle.
+- Keep the full hypothesis list active. Finding one interesting thing does not mean everything else is uninteresting. The rest of the queue stays open.
+
+**After a finding is confirmed and documented:**
+- Close it cleanly: log the Finding, write the checkpoint, run `/triager`, queue the report. Then **let go of it**.
+- Do not spend the rest of the session re-verifying, re-documenting, or mentally dwelling on an already-confirmed finding. It is done. Move.
+- A confirmed finding is fuel, not a finish line. Ask: what does this finding tell me about how this application was built? What other surfaces were built by the same team, with the same assumptions, using the same patterns? Those are the next hypotheses.
+
+**Using lesson material for forward movement:**
+- Every confirmed finding, every N/A, every duplicate carries a signal about *how this target thinks*. Extract that signal and reapply it.
+- After any finding (positive or negative), run this mental check before moving on:
+  1. What assumption did I confirm or disprove?
+  2. What other endpoint or flow makes the same assumption?
+  3. What would a developer who wrote this bug also have gotten wrong elsewhere?
+- Feed the answer to `/hypothesis-agent` as context. Confirmed primitives and behavioral patterns from one finding are often the most reliable input for the next hypothesis.
+- Record reusable techniques in the **Primitives** layer of notes (e.g., "this target trusts X-Forwarded-For for rate limiting"). Primitives compound across the engagement.
+
+**Signals that you are fixating (stop and recalibrate):**
+- You have retried the same request more than 5 times with minor variations and no new information.
+- You are spending more than 20 minutes writing up a lead that has not yet been validated.
+- You are mentally anchored to "the IDOR I found earlier" while ignoring an unexamined lead in the queue.
+- You are re-reading notes you have already read without producing a new test.
+
+When any of these signals appear, run `/focus-discipline` to recalibrate.
