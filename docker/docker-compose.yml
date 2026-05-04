@@ -1,0 +1,121 @@
+# Containerized recon stack for claude-code-bb
+# Provides: subfinder, httpx, katana, nuclei, Elasticsearch, Kibana
+#
+# Usage:
+#   export TARGET=example.com
+#   docker compose --env-file .env up -d elasticsearch kibana
+#   docker compose run --rm subfinder -d $TARGET -o /recon/subdomains.txt
+#   docker compose run --rm httpx -l /recon/subdomains.txt -o /recon/live-hosts.txt
+#   docker compose run --rm katana -list /recon/live-hosts.txt -o /recon/endpoints.txt
+#   docker compose run --rm nuclei -l /recon/live-hosts.txt -tags cve -o /recon/vulns/nuclei-cve.txt
+#
+# All output lands in ./recon-data/ on the host (mounted as /recon inside containers).
+# Elasticsearch is available at http://localhost:9200
+# Kibana is available at http://localhost:5601
+
+services:
+
+  # ── Recon tools ──────────────────────────────────────────────────────────
+
+  subfinder:
+    image: projectdiscovery/subfinder:latest
+    volumes:
+      - ./recon-data:/recon
+      - subfinder-config:/root/.config/subfinder
+    working_dir: /recon
+    network_mode: host
+    entrypoint: ["subfinder"]
+
+  httpx:
+    image: projectdiscovery/httpx:latest
+    volumes:
+      - ./recon-data:/recon
+    working_dir: /recon
+    network_mode: host
+    entrypoint: ["httpx"]
+
+  katana:
+    image: projectdiscovery/katana:latest
+    volumes:
+      - ./recon-data:/recon
+    working_dir: /recon
+    network_mode: host
+    entrypoint: ["katana"]
+
+  dnsx:
+    image: projectdiscovery/dnsx:latest
+    volumes:
+      - ./recon-data:/recon
+    working_dir: /recon
+    network_mode: host
+    entrypoint: ["dnsx"]
+
+  nuclei:
+    image: projectdiscovery/nuclei:latest
+    volumes:
+      - ./recon-data:/recon
+      - nuclei-templates:/root/nuclei-templates
+    working_dir: /recon
+    network_mode: host
+    entrypoint: ["nuclei"]
+
+  # ── Findings storage & analytics ─────────────────────────────────────────
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: bb-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - cluster.name=bugbounty
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:9200/_cluster/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: bb-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - XPACK_SECURITY_ENABLED=false
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Index loader (runs once, feeds recon data into ES) ────────────────────
+  es-loader:
+    image: python:3.12-slim
+    container_name: bb-es-loader
+    volumes:
+      - ./recon-data:/recon
+      - ./docker/scripts:/scripts
+    environment:
+      - ES_HOST=http://elasticsearch:9200
+      - TARGET=${TARGET:-unknown}
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    entrypoint: ["python3", "/scripts/load_recon.py"]
+    profiles:
+      - load
+
+volumes:
+  es-data:
+  subfinder-config:
+  nuclei-templates:
