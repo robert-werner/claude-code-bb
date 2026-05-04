@@ -21,7 +21,7 @@ Every session follows this order. Do not skip steps.
    - `/oauth-hunter` — OAuth flows, SSO, social login, JWT authentication
    - `/graphql-hunter` — GraphQL endpoints and APIs
 6. **Validate** — Every finding must pass the PoC standard before being logged as a Finding.
-7. **Report** — Use `/report-draft` to format. Use `/triager` to critique before submitting. Do not submit anything the triager would reject.
+7. **Report** — Use `/report-draft` to format. Use `/triager` to critique before submitting. Run `/dedup-check` before any submission. Do not submit anything the triager would reject.
 8. **Checkpoint** — Write a `/session-resume` checkpoint after every validated finding, at every major recon phase completion, and every 2 hours of autonomous operation.
 9. **Debrief** — After any closure (N/A, Duplicate, Informational), run `/triage-debrief` immediately. Append extracted rules to ~/bugbounty/lessons-learned.md.
 
@@ -39,11 +39,16 @@ Every session follows this order. Do not skip steps.
 | `/race-condition-hunter` | When endpoints involve rate-limited actions, payments, coupons, tokens, balance/credit systems, or any shared-state operation |
 | `/oauth-hunter` | When target implements OAuth 2.0, OpenID Connect, SSO, social login, or JWT-based authentication |
 | `/graphql-hunter` | When target exposes a GraphQL endpoint — schema extraction, BOLA, mutation auth, injection, batching, IDE exposure |
+| `/cve-vuln-check` | After stack fingerprinting — cross-reference tech versions against CVE databases and run targeted nuclei CVE templates |
+| `/dedup-check` | After /triager, before any submission — similarity check against program's disclosed reports |
+| `/elasticsearch-findings` | Index recon and findings into ES — cross-engagement search, reward stats, pattern analytics |
+| `/focus-discipline` | When the hunt stalls, loops, or fixates — recalibrate focus and redeploy lesson material |
 | `/triager` | Before every submission — brutal pre-submission critique |
 | `/report-draft` | Format a validated finding into a submission-ready report |
 | `/session-resume` | End of session (WRITE) or start of resumed session (READ) |
-| `/triage-debrief` | After every report closure — extract lessons, detect patterns |
-| `/focus-discipline` | When the hunt stalls, loops, or fixates — recalibrate focus and redeploy lesson material |
+| `/triage-debrief` | After every report closure — extract lessons, detect patterns, deploy lesson material forward |
+| `/skill-writer` | When a technique used in a hunt has no corresponding skill — encode it into a permanent skill file |
+| `/skill-index-updater` | After /skill-writer completes — sync CLAUDE.md and README.md with the new skill |
 
 ## Recon Workflows
 
@@ -128,3 +133,41 @@ This section governs how to behave *around* a finding — before it, during it, 
 - You are re-reading notes you have already read without producing a new test.
 
 When any of these signals appear, run `/focus-discipline` to recalibrate.
+
+## Self-Learning
+
+This section governs how the skill library grows autonomously during hunts.
+
+**When to write a new skill:**
+If a technique, attack class, or recon method is used during a hunt that has no corresponding skill file — and it is repeatable, requires reasoning, and would improve future hunts — it must be encoded as a skill. Do not leave novel techniques in session notes where they die with the session.
+
+**The trigger conditions are:**
+- A validated finding uses a technique not covered by any existing skill
+- A new attack class is encountered that has no specialist hunter in the skills index
+- A recon method produces high-signal output that has no corresponding workflow
+- A series of hypotheses on a surface reveals a behavioral pattern worth encoding
+- The hunter explicitly says this belongs in the skill library
+
+**The process:**
+1. Run `/skill-writer` — it qualifies, authors, and writes the skill file
+2. Run `/skill-index-updater` — it syncs `CLAUDE.md` and `README.md`
+3. Commit to git with message format: `feat(skill): add [skill-name] — [one-line discovery context]`
+4. The skill is now active and will be used on the current and all future targets
+
+**What goes into a Primitive vs. a Skill:**
+- **Primitive** — a reusable gadget or behavior observed on this specific target (e.g. "open redirect on /redirect?url="). Recorded in notes. Target-specific.
+- **Skill** — a repeatable methodology that applies across targets and requires Claude to reason. Recorded in `skills/`. Target-agnostic.
+
+Do not write a skill for every Primitive. Primitives become skill candidates only when the same pattern appears on multiple targets or when the exploitation chain is complex enough to require step-by-step guidance.
+
+**Skill quality gate:**
+A skill written during a hunt must pass the same checklist as any manually authored skill (see `/skill-writer` Step 4). Autonomous skills are not held to a lower standard. A bad skill is worse than no skill.
+
+**After every engagement:**
+At session end, before writing the final `/session-resume` checkpoint, run this check:
+
+```
+Did this engagement produce any technique, pattern, or method not covered by an existing skill?
+  YES → Run /skill-writer before closing the session
+  NO  → Note "no new skills produced" in the checkpoint and close
+```
