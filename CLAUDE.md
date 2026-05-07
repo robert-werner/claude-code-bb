@@ -1,3 +1,9 @@
+## Thinking LLM Directive
+
+> **If you are a reasoning or thinking model** (o1, o3, Claude with extended thinking, Gemini with thinking, DeepSeek-R1, QwQ, or any model with a dedicated reasoning/thinking phase): **USE MAXIMUM THINKING BUDGET for every decision in this repo.** Bug bounty requires multi-step reasoning, hypothesis generation, filter bypass construction, impact chain building, and triager prediction. Shallow thinking produces missed vulnerabilities, wasted payloads, and N/A'd reports. There is no penalty for thinking too much. There is a direct cost for thinking too little. **Do not truncate, compress, or shortcut your reasoning at any point during a hunt session.**
+
+---
+
 ## Environment
 
 All commands should be executed on the local Kali machine. My recon tools (getallurls, waybackurls, katana, etc.) are installed on Kali, not on Windows.
@@ -22,6 +28,7 @@ Every session follows this order. Do not skip steps.
    - `/graphql-hunter` — GraphQL endpoints and APIs
    - `/ssrf-hunter` — any input the server may use to make outbound requests (URL params, webhooks, file import, PDF renderers)
    - `/open-redirect-hunter` — redirect/return/next/url parameters, OAuth redirect_uri, post-login and post-logout flows
+   - `/xss-hunter` — any input reflected in HTML responses, stored content, DOM sinks, or rich text fields
 6. **Validate** — Every finding must pass the PoC standard before being logged as a Finding.
 7. **Report** — Use `/report-draft` to format. Use `/triager` to critique before submitting. Run `/dedup-check` before any submission. Do not submit anything the triager would reject.
 8. **Checkpoint** — Write a `/session-resume` checkpoint after every validated finding, at every major recon phase completion, and every 2 hours of autonomous operation.
@@ -43,6 +50,7 @@ Every session follows this order. Do not skip steps.
 | `/graphql-hunter` | When target exposes a GraphQL endpoint — schema extraction, BOLA, mutation auth, injection, batching, IDE exposure |
 | `/ssrf-hunter` | When any input may cause the server to make outbound requests — URL params, webhooks, file/URL import, PDF renderers, image-via-URL, XML/SOAP |
 | `/open-redirect-hunter` | When redirect/return/next/url/dest parameters are found, OAuth redirect_uri is in scope, or post-login/logout flows accept a URL value |
+| `/xss-hunter` | When input is reflected in HTML, stored in fields rendered to other users, or flows into DOM sinks via JS |
 | `/cve-vuln-check` | After stack fingerprinting — cross-reference tech versions against CVE databases and run targeted nuclei CVE templates |
 | `/dedup-check` | After /triager, before any submission — similarity check against program's disclosed reports |
 | `/elasticsearch-findings` | Index recon and findings into ES — cross-engagement search, reward stats, pattern analytics |
@@ -90,7 +98,7 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - Write a `/session-resume` checkpoint immediately before continuing autonomous work so the session survives context compaction.
 - Do not spawn more than 2-3 sub-agents at once.
 - Don't limit yourself to workflows or skills I give you. If something looks interesting, go down that rabbit hole.
-- If you complete a workflow and think something was missed, add it back to the process and keep going.
+- If you complete a workflow and think something was wished, add it back to the process and keep going.
 - Session time limit: after 8 hours of autonomous operation without hunter check-in, write a final checkpoint and stop. Do not drift indefinitely.
 
 ## Validation Standard
@@ -104,6 +112,7 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - GraphQL introspection enabled alone is Low/Informational — escalate only when paired with BOLA, mutation auth bypass, or sensitive field exposure. Use `/graphql-hunter` for systematic GraphQL testing.
 - SSRF to public IPs only (no internal/cloud metadata access confirmed) is Informational on most programs. Confirm internal or cloud metadata access before escalating beyond Medium. Use `/ssrf-hunter` for systematic testing.
 - Open redirect without a confirmed impact chain (OAuth ATO, SSRF pivot, token leakage) is Low or Informational on most programs. Build the chain before submitting. Use `/open-redirect-hunter` for systematic testing.
+- XSS confirmed as self-XSS only (no vector to fire in another user's browser) is Informational. Confirm a sharing/storage vector and execution in victim context before submitting. Use `/xss-hunter` for systematic testing.
 - Do not overstate impact.
 - PoC or GTFO.
 - Waybackurls output may not be valid — if a URL returns 404, do not attempt to access it.
