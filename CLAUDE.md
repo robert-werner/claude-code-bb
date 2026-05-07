@@ -33,6 +33,7 @@ Every session follows this order. Do not skip steps.
    - `/file-upload-hunter` — any file upload, import, avatar, attachment, media, or document flow
    - `/subdomain-takeover` — after recon when dangling CNAMEs or third-party DNS targets need takeover verification
    - `/wordpress-hunter` — WordPress targets identified via wp-content, wp-login, wp-admin, or generator tags
+   - `/ssti-hunter` — any input rendered through a template engine — email subjects, notification messages, PDF generators, report/invoice title fields, search result headers
 6. **Validate** — Every finding must pass the PoC standard before being logged as a Finding.
 7. **Report** — Use `/report-draft` to format. Use `/triager` to critique before submitting. Run `/dedup-check` before any submission. Do not submit anything the triager would reject.
 8. **Checkpoint** — Write a `/session-resume` checkpoint after every validated finding, at every major recon phase completion, and every 2 hours of autonomous operation.
@@ -59,6 +60,7 @@ Every session follows this order. Do not skip steps.
 | `/file-upload-hunter` | When target accepts files via upload, import, avatar, media, document, or multipart/form-data endpoints |
 | `/subdomain-takeover` | After subdomain enumeration when dangling CNAMEs or third-party SaaS/cloud DNS targets need takeover verification |
 | `/wordpress-hunter` | When recon identifies WordPress via wp-content, wp-login.php, wp-admin, generator tags, or WordPress headers |
+| `/ssti-hunter` | When user input is rendered through a template engine — email/notification templates, PDF/document generators, report/invoice title fields, search result headers, or any field producing formatted output |
 | `/cve-vuln-check` | After stack fingerprinting — cross-reference tech versions against CVE databases and run targeted nuclei CVE templates |
 | `/dedup-check` | After /triager, before any submission — similarity check against program's disclosed reports |
 | `/elasticsearch-findings` | Index recon and findings into ES — cross-engagement search, reward stats, pattern analytics |
@@ -125,6 +127,7 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - File upload findings require confirmed exploitability (server-side execution, stored XSS, XXE, path traversal, or sensitive file overwrite) — not just extension acceptance. Use `/file-upload-hunter` for systematic testing.
 - Subdomain takeover requires verified claimability on the third-party service, not just a dangling CNAME. Use `/subdomain-takeover` for systematic testing.
 - WordPress version exposure or plugin disclosure alone are not findings without an exploitable condition or a matching CVE with a confirmed vulnerable version. Use `/wordpress-hunter` for systematic testing.
+- SSTI with math evaluation only (e.g. {{7*7}} → 49) and no confirmed RCE, file read, or secret extraction is Medium at most on most programs. Escalate to code execution or secret extraction before submitting as Critical. Use `/ssti-hunter` for systematic testing.
 - Do not overstate impact.
 - PoC or GTFO.
 - Waybackurls output may not be valid — if a URL returns 404, do not attempt to access it.
@@ -155,7 +158,7 @@ This section governs how to behave *around* a finding — before it, during it, 
 
 **Signals that you are fixating (stop and recalibrate):**
 - You have retried the same request more than 5 times with minor variations and no new information.
-- You are spending more than 20 minutes writing up a lead that has not yet been validated.
+- You are spending more than 20 minutes writing up a lead that has no yet been validated.
 - You are mentally anchored to "the IDOR I found earlier" while ignoring an unexamined lead in the queue.
 - You are re-reading notes you have already read without producing a new test.
 
