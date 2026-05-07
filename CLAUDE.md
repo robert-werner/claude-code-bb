@@ -25,6 +25,7 @@ Every session follows this order. Do not skip steps.
    - `/dotnet-hunter` — .NET, ASP.NET, or IIS targets
    - `/race-condition-hunter` — rate-limited actions, payments, tokens, balance operations
    - `/oauth-hunter` — OAuth flows, SSO, social login, JWT authentication
+   - `/jwt-hunter` — Bearer tokens, JWT-shaped cookies, JWKS endpoints, or any surface where JWT is the primary attack surface independent of OAuth
    - `/graphql-hunter` — GraphQL endpoints and APIs
    - `/ssrf-hunter` — any input the server may use to make outbound requests (URL params, webhooks, file import, PDF renderers)
    - `/open-redirect-hunter` — redirect/return/next/url parameters, OAuth redirect_uri, post-login and post-logout flows
@@ -53,6 +54,7 @@ Every session follows this order. Do not skip steps.
 | `/dotnet-hunter` | When target runs .NET, ASP.NET, or IIS — fingerprint stack, hunt ViewState, Telerik, ELMAH, machineKey, and IIS-specific bugs |
 | `/race-condition-hunter` | When endpoints involve rate-limited actions, payments, coupons, tokens, balance/credit systems, or any shared-state operation |
 | `/oauth-hunter` | When target implements OAuth 2.0, OpenID Connect, SSO, social login, or JWT-based authentication |
+| `/jwt-hunter` | When JWT tokens are present as Bearer tokens, JWT-shaped cookies, or API tokens — and JWT is the primary attack surface. Covers alg:none, alg confusion, HMAC brute-force, kid/jku/x5u/embedded-JWK injection, claims tampering, expiry and revocation bypass, cross-tenant reuse. Run independently of /oauth-hunter when JWT handling is the target |
 | `/graphql-hunter` | When target exposes a GraphQL endpoint — schema extraction, BOLA, mutation auth, injection, batching, IDE exposure |
 | `/ssrf-hunter` | When any input may cause the server to make outbound requests — URL params, webhooks, file/URL import, PDF renderers, image-via-URL, XML/SOAP |
 | `/open-redirect-hunter` | When redirect/return/next/url/dest parameters are found, OAuth redirect_uri is in scope, or post-login/logout flows accept a URL value |
@@ -121,6 +123,7 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - .NET ViewState findings require MAC validation status confirmed before logging. Use `/dotnet-hunter` for systematic .NET testing.
 - Race condition findings require actual state change confirmed post-race (balance, count, flag). Multiple 200s alone are not sufficient. Use `/race-condition-hunter` for systematic testing.
 - OAuth state parameter absence requires a complete login CSRF attack scenario. Use `/oauth-hunter` for systematic OAuth testing.
+- JWT algorithm confusion (alg:none, RS256→HS256) requires a forged token accepted by the server with tampered claims confirmed — a token merely signed differently without verified server acceptance is not a finding. HMAC secret cracked alone without privilege escalation PoC is Medium at most. Use `/jwt-hunter` for systematic testing.
 - GraphQL introspection enabled alone is Low/Informational — escalate only when paired with BOLA, mutation auth bypass, or sensitive field exposure. Use `/graphql-hunter` for systematic GraphQL testing.
 - SSRF to public IPs only (no internal/cloud metadata access confirmed) is Informational on most programs. Confirm internal or cloud metadata access before escalating beyond Medium. Use `/ssrf-hunter` for systematic testing.
 - Open redirect without a confirmed impact chain (OAuth ATO, SSRF pivot, token leakage) is Low or Informational on most programs. Build the chain before submitting. Use `/open-redirect-hunter` for systematic testing.
