@@ -83,8 +83,9 @@ Recon workflows are in the `/recon` directory. Run them in this order for a new 
 1. **`/recon/subdomain-enum`** — Passive subdomain discovery (subfinder + waybackurls + crt.sh), DNS resolution, HTTP probing, priority scoring, takeover candidate detection
 2. **`/recon/js-analysis`** — Download and mine JS bundles for endpoints, secrets, feature flags, GraphQL operations
 3. **`/recon/api-surface`** — Spec file discovery (Swagger/OpenAPI), Wayback API mining, katana crawl, endpoint classification, GraphQL introspection
+4. **`/recon/nuclei-scan`** — CVE detection, tech fingerprinting, exposure/misconfiguration discovery, secret scanning, and subdomain takeover templates against live hosts and API surface
 
-After all three are complete, run `/hypothesis-agent ~/bugbounty/$TARGET` to generate hypotheses from the combined recon output.
+After all are complete, run `/hypothesis-agent ~/bugbounty/$TARGET` to generate hypotheses from the combined recon output.
 
 ## Rules of Engagement
 
