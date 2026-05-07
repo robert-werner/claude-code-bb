@@ -20,6 +20,8 @@ Every session follows this order. Do not skip steps.
    - `/race-condition-hunter` — rate-limited actions, payments, tokens, balance operations
    - `/oauth-hunter` — OAuth flows, SSO, social login, JWT authentication
    - `/graphql-hunter` — GraphQL endpoints and APIs
+   - `/ssrf-hunter` — any input the server may use to make outbound requests (URL params, webhooks, file import, PDF renderers)
+   - `/open-redirect-hunter` — redirect/return/next/url parameters, OAuth redirect_uri, post-login and post-logout flows
 6. **Validate** — Every finding must pass the PoC standard before being logged as a Finding.
 7. **Report** — Use `/report-draft` to format. Use `/triager` to critique before submitting. Run `/dedup-check` before any submission. Do not submit anything the triager would reject.
 8. **Checkpoint** — Write a `/session-resume` checkpoint after every validated finding, at every major recon phase completion, and every 2 hours of autonomous operation.
@@ -39,6 +41,8 @@ Every session follows this order. Do not skip steps.
 | `/race-condition-hunter` | When endpoints involve rate-limited actions, payments, coupons, tokens, balance/credit systems, or any shared-state operation |
 | `/oauth-hunter` | When target implements OAuth 2.0, OpenID Connect, SSO, social login, or JWT-based authentication |
 | `/graphql-hunter` | When target exposes a GraphQL endpoint — schema extraction, BOLA, mutation auth, injection, batching, IDE exposure |
+| `/ssrf-hunter` | When any input may cause the server to make outbound requests — URL params, webhooks, file/URL import, PDF renderers, image-via-URL, XML/SOAP |
+| `/open-redirect-hunter` | When redirect/return/next/url/dest parameters are found, OAuth redirect_uri is in scope, or post-login/logout flows accept a URL value |
 | `/cve-vuln-check` | After stack fingerprinting — cross-reference tech versions against CVE databases and run targeted nuclei CVE templates |
 | `/dedup-check` | After /triager, before any submission — similarity check against program's disclosed reports |
 | `/elasticsearch-findings` | Index recon and findings into ES — cross-engagement search, reward stats, pattern analytics |
@@ -98,6 +102,8 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - Race condition findings require actual state change confirmed post-race (balance, count, flag). Multiple 200s alone are not sufficient. Use `/race-condition-hunter` for systematic testing.
 - OAuth state parameter absence requires a complete login CSRF attack scenario. Use `/oauth-hunter` for systematic OAuth testing.
 - GraphQL introspection enabled alone is Low/Informational — escalate only when paired with BOLA, mutation auth bypass, or sensitive field exposure. Use `/graphql-hunter` for systematic GraphQL testing.
+- SSRF to public IPs only (no internal/cloud metadata access confirmed) is Informational on most programs. Confirm internal or cloud metadata access before escalating beyond Medium. Use `/ssrf-hunter` for systematic testing.
+- Open redirect without a confirmed impact chain (OAuth ATO, SSRF pivot, token leakage) is Low or Informational on most programs. Build the chain before submitting. Use `/open-redirect-hunter` for systematic testing.
 - Do not overstate impact.
 - PoC or GTFO.
 - Waybackurls output may not be valid — if a URL returns 404, do not attempt to access it.
