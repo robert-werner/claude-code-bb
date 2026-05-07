@@ -26,7 +26,7 @@ preflight-check
       → js-analysis → api-surface
           → hypothesis-agent
               → idor-hunter / dotnet-hunter / race-condition-hunter
-                / oauth-hunter / graphql-hunter / manual testing
+                / oauth-hunter / graphql-hunter / jwt-hunter / manual testing
                   → report-draft → triager → submit
                       → triage-debrief (after every closure)
 ```
@@ -46,6 +46,7 @@ preflight-check
 | `skills/dotnet-hunter.md` | Comprehensive .NET/ASP.NET skill — fingerprints the stack (WebForms, MVC, Core, WCF, IIS), maps .NET-specific attack surface, and systematically tests ViewState MAC, Telerik CVEs, ELMAH/trace exposure, machineKey leaks, IIS tilde enumeration, and ASP.NET Core routing bypasses |
 | `skills/race-condition-hunter.md` | Systematic race condition hunting covering 6 vulnerability classes (double-spend, coupon reuse, token reuse, limit bypass, TOCTOU, duplicate resource). Includes single-packet HTTP/2 attack technique, parallel curl playbooks for each class, and requires actual state change confirmation before logging a finding |
 | `skills/oauth-hunter.md` | Full OAuth 2.0 and authentication flow audit — covers OpenID Connect discovery, state/CSRF testing, redirect_uri manipulation (7 bypass variants), authorization code replay, JWT algorithm confusion (alg:none and RS256→HS256), account takeover chains via pre-auth linking and unverified email claims, and provider-specific checks for Auth0, Keycloak, and Azure AD |
+| `skills/jwt-hunter.md` | Dedicated JWT attack surface coverage — alg:none (all capitalisation variants), RS256→HS256 and ECDSA key confusion, HMAC secret brute-force (hashcat mode 16500), kid path traversal and SQL injection, jku/x5u/embedded-JWK header injection, claims tampering, expiry and revocation bypass, cross-tenant token reuse, and JWT-in-cookie misconfigurations. Use when JWT is the primary surface, independent of whether OAuth is in scope |
 | `skills/graphql-hunter.md` | Comprehensive GraphQL security audit — introspection extraction and bypass techniques, BOLA and field-level authorization testing, mutation auth bypass, SQL/NoSQL injection via arguments, SSRF via URL fields, alias and array batching attacks, query complexity DoS, GraphQL IDE exposure, and deprecated field exploitation |
 | `skills/triager.md` | Pre-submission critique — simulates a real Bugcrowd triager, runs N/A pattern detection, validates the impact chain, calibrates severity, and produces a Submit / Fix / Do Not Submit verdict |
 | `skills/report-draft.md` | Formats a validated finding into a clean, submission-ready report |
@@ -84,6 +85,7 @@ claude-code-bb/
 │   ├── dotnet-hunter.md               # .NET/ASP.NET/IIS fingerprinting and vulnerability hunting
 │   ├── race-condition-hunter.md       # Race condition detection and exploitation
 │   ├── oauth-hunter.md                # OAuth 2.0, SSO, JWT, and auth flow testing
+│   ├── jwt-hunter.md                  # Dedicated JWT attack surface — alg confusion, kid/jku injection, HMAC brute-force
 │   ├── graphql-hunter.md              # GraphQL introspection, authorization, injection, and batching
 │   ├── triager.md                     # Pre-submission report critique
 │   ├── report-draft.md                # Finding → submission-ready report
