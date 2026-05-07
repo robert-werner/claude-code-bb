@@ -29,6 +29,10 @@ Every session follows this order. Do not skip steps.
    - `/ssrf-hunter` — any input the server may use to make outbound requests (URL params, webhooks, file import, PDF renderers)
    - `/open-redirect-hunter` — redirect/return/next/url parameters, OAuth redirect_uri, post-login and post-logout flows
    - `/xss-hunter` — any input reflected in HTML responses, stored content, DOM sinks, or rich text fields
+   - `/sqli-hunter` — parameters feeding database queries, reflected DB errors, numeric IDs, filters, sort/order params
+   - `/file-upload-hunter` — any file upload, import, avatar, attachment, media, or document flow
+   - `/subdomain-takeover` — after recon when dangling CNAMEs or third-party DNS targets need takeover verification
+   - `/wordpress-hunter` — WordPress targets identified via wp-content, wp-login, wp-admin, or generator tags
 6. **Validate** — Every finding must pass the PoC standard before being logged as a Finding.
 7. **Report** — Use `/report-draft` to format. Use `/triager` to critique before submitting. Run `/dedup-check` before any submission. Do not submit anything the triager would reject.
 8. **Checkpoint** — Write a `/session-resume` checkpoint after every validated finding, at every major recon phase completion, and every 2 hours of autonomous operation.
@@ -51,6 +55,10 @@ Every session follows this order. Do not skip steps.
 | `/ssrf-hunter` | When any input may cause the server to make outbound requests — URL params, webhooks, file/URL import, PDF renderers, image-via-URL, XML/SOAP |
 | `/open-redirect-hunter` | When redirect/return/next/url/dest parameters are found, OAuth redirect_uri is in scope, or post-login/logout flows accept a URL value |
 | `/xss-hunter` | When input is reflected in HTML, stored in fields rendered to other users, or flows into DOM sinks via JS |
+| `/sqli-hunter` | When user input may reach SQL queries — IDs, search, filters, sort/order params, numeric lookups, or database errors observed |
+| `/file-upload-hunter` | When target accepts files via upload, import, avatar, media, document, or multipart/form-data endpoints |
+| `/subdomain-takeover` | After subdomain enumeration when dangling CNAMEs or third-party SaaS/cloud DNS targets need takeover verification |
+| `/wordpress-hunter` | When recon identifies WordPress via wp-content, wp-login.php, wp-admin, generator tags, or WordPress headers |
 | `/cve-vuln-check` | After stack fingerprinting — cross-reference tech versions against CVE databases and run targeted nuclei CVE templates |
 | `/dedup-check` | After /triager, before any submission — similarity check against program's disclosed reports |
 | `/elasticsearch-findings` | Index recon and findings into ES — cross-engagement search, reward stats, pattern analytics |
@@ -98,7 +106,7 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - Write a `/session-resume` checkpoint immediately before continuing autonomous work so the session survives context compaction.
 - Do not spawn more than 2-3 sub-agents at once.
 - Don't limit yourself to workflows or skills I give you. If something looks interesting, go down that rabbit hole.
-- If you complete a workflow and think something was wished, add it back to the process and keep going.
+- If you complete a workflow and think something was missed, add it back to the process and keep going.
 - Session time limit: after 8 hours of autonomous operation without hunter check-in, write a final checkpoint and stop. Do not drift indefinitely.
 
 ## Validation Standard
@@ -113,6 +121,10 @@ Organize all findings in this hierarchy. More at the bottom, fewer make it to th
 - SSRF to public IPs only (no internal/cloud metadata access confirmed) is Informational on most programs. Confirm internal or cloud metadata access before escalating beyond Medium. Use `/ssrf-hunter` for systematic testing.
 - Open redirect without a confirmed impact chain (OAuth ATO, SSRF pivot, token leakage) is Low or Informational on most programs. Build the chain before submitting. Use `/open-redirect-hunter` for systematic testing.
 - XSS confirmed as self-XSS only (no vector to fire in another user's browser) is Informational. Confirm a sharing/storage vector and execution in victim context before submitting. Use `/xss-hunter` for systematic testing.
+- SQL injection requires confirmed query influence via in-band error, blind boolean/time differential, or OOB callback — not just a generic 500 error. Use `/sqli-hunter` for systematic testing.
+- File upload findings require confirmed exploitability (server-side execution, stored XSS, XXE, path traversal, or sensitive file overwrite) — not just extension acceptance. Use `/file-upload-hunter` for systematic testing.
+- Subdomain takeover requires verified claimability on the third-party service, not just a dangling CNAME. Use `/subdomain-takeover` for systematic testing.
+- WordPress version exposure or plugin disclosure alone are not findings without an exploitable condition or a matching CVE with a confirmed vulnerable version. Use `/wordpress-hunter` for systematic testing.
 - Do not overstate impact.
 - PoC or GTFO.
 - Waybackurls output may not be valid — if a URL returns 404, do not attempt to access it.
